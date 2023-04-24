@@ -40,13 +40,20 @@ class ModelBase(keras.Sequential):
             X,
             y,
             epochs=self.__config[self.model_name]["train"]["epochs"],
-            validation_split=self.__config[self.model_name]["train"]["validation_split"],
+            validation_split=self.__config[self.model_name]["train"][
+                "validation_split"
+            ],
         )
 
     def save(self):
         with suppress(FileNotFoundError):
             shutil.rmtree("teacher_model")
 
+        logging.debug(
+            "Saving '{}' to '{}'".format(
+                self.model_name, self.__config[self.model_name]["dir"]
+            )
+        )
         keras.Sequential.save(self, self.__config[self.model_name]["dir"])
 
 
@@ -93,7 +100,7 @@ class Distiller(keras.Model):
 
     def compile(self):
         optimizer = keras.optimizers.Adam()
-        metrics = ['accuracy']
+        metrics = ["accuracy"]
 
         keras.Model.compile(self, optimizer=optimizer, metrics=metrics)
 
@@ -165,4 +172,4 @@ class Distiller(keras.Model):
         return results
 
     def fit(self, X, y):
-        keras.Model.fit(self, X, y, epochs=CONFIG["distiller"]['train']["epochs"])
+        keras.Model.fit(self, X, y, epochs=CONFIG["distiller"]["train"]["epochs"])
