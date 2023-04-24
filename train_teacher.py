@@ -1,5 +1,5 @@
-from models import TeacherModel
 from data import get_data
+from models import TeacherModel
 
 
 def main():
@@ -13,4 +13,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -3,13 +3,14 @@ import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 import argparse
+import logging
 import sys
 from time import time
-import logging
-from logger import setup_logger
+
 from tensorflow import keras
 
 from data import get_data
+from logger import setup_logger
 
 
 def main(context):
@@ -40,4 +41,3 @@ if __name__ == "__main__":
 
     setup_logger()
     main(parser.parse_args())
-

@@ -11,6 +11,8 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
+from logger import setup_logger
+
 
 def _read_config(path):
     with open(path, "r") as fd:
@@ -18,6 +20,7 @@ def _read_config(path):
 
 
 CONFIG = _read_config("config.json")
+setup_logger()
 
 
 class ModelBase(keras.Sequential):
