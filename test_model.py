@@ -5,7 +5,8 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import argparse
 import sys
 from time import time
-
+import logging
+from logger import setup_logger
 from tensorflow import keras
 
 from data import get_data
@@ -13,7 +14,7 @@ from data import get_data
 
 def main(context):
     if not os.path.exists(context.dir):
-        print("Error: no such dir: {}".format(context.dir))
+        logging.error("Error: no such dir: {}".format(context.dir))
         sys.exit(1)
 
     model = keras.models.load_model(context.dir)
@@ -26,16 +27,17 @@ def main(context):
 
     speed = t / x_test.shape[0]
 
-    print("Loss: {}".format(loss))
-    print("Metric: {}".format(metric))
-    print("Test vector size: {}".format(x_test.shape[0]))
-    print("Model time prediction: {} sec".format(t))
-    print("Speed: {}".format(speed))
+    logging.info("Loss: {}".format(loss))
+    logging.info("Metric: {}".format(metric))
+    logging.info("Test vector size: {}".format(x_test.shape[0]))
+    logging.info("Model time prediction: {} sec".format(t))
+    logging.info("Speed: {}".format(speed))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", required=True)
 
+    setup_logger()
     main(parser.parse_args())
 
