@@ -1,0 +1,7 @@
+{
+    "train": {
+        "epochs": 1,
+        "training_vector_size": 100
+    },
+    "dir": "models/teacher_model"
+}
