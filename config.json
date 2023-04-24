@@ -1,0 +1,22 @@
+{
+    "teacher": {
+        "train": {
+            "epochs": 12,
+            "validation_split": 0.2
+        },
+        "dir": "models/teacher_model"
+    },
+    "student": {
+        "train": {
+            "epochs": 15,
+            "validation_split": 0.2
+        },
+        "dir": "models/student_model"
+    },
+    "distiller": {
+        "train": {
+            "epochs": 5,
+            "validation_split": 0.2
+        }
+    }
+}
