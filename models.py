@@ -58,7 +58,7 @@ class TeacherModel(ModelBase):
         self.add(layers.Dense(64, activation="relu"))
         self.add(layers.Dropout(0.15))
         self.add(layers.Dense(32, activation="relu"))
-        self.add(layers.Dropout(0.25))
+        self.add(layers.Dropout(0.15))
         self.add(layers.Dense(16, activation="relu"))
         self.add(layers.Dropout(0.25))
         self.add(layers.Dense(1, activation="sigmoid"))
@@ -77,6 +77,8 @@ class StudentModel(ModelBase):
         ModelBase.__init__(self, "student")
 
         self.add(keras.Input(shape=(12,)))
+        self.add(layers.Dense(32, activation="relu"))
+        self.add(layers.Dropout(0.15))
         self.add(layers.Dense(16, activation="relu"))
         self.add(layers.Dropout(0.25))
         self.add(layers.Dense(1, activation="sigmoid"))

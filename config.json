@@ -1,7 +1,7 @@
 {
     "teacher": {
         "train": {
-            "epochs": 15,
+            "epochs": 12,
             "validation_split": 0.2
         },
         "dir": "models/teacher_model"
@@ -15,7 +15,7 @@
     },
     "distiller": {
         "train": {
-            "epochs": 15,
+            "epochs": 5,
             "validation_split": 0.2
         }
     }
