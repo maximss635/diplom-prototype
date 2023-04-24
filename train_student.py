@@ -7,7 +7,7 @@ def main():
     x_train, y_train, x_test, y_test = get_data()
 
     print("Loading teacher model")
-    teacher_model_dir = "teacher_model"
+    teacher_model_dir = "models/teacher_model"
     teacher_model = keras.models.load_model(teacher_model_dir)
 
     print("Create student model")
@@ -34,7 +34,7 @@ def main():
     print("Training student model")
     student_scratch.fit(x_train, y_train, epochs=3)
 
-    student_scratch.save("student_model")
+    student_scratch.save("models/student_model")
 
 
 if __name__ == "__main__":
