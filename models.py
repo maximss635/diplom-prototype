@@ -17,16 +17,21 @@ def _read_config(path):
         return json.load(fd)
 
 
+CONFIG = _read_config("config.json")
+
+
 class ModelBase(keras.Sequential):
     def __init__(self, model_name):
         keras.Sequential.__init__(self, name=model_name)
 
-        self.__config = _read_config("teacher_model_config.json")
+        self.model_name = model_name
+
+        self.__config = _read_config("config.json")
 
     def fit(self, X, y):
         logging.debug(
             "Start training model '{}'. epochs={}, training_vector_size={}".format(
-                self.name, self.__config["train"]["epochs"], X.shape[0]
+                self.name, self.__config[self.model_name]["train"]["epochs"], X.shape[0]
             )
         )
 
@@ -34,15 +39,15 @@ class ModelBase(keras.Sequential):
             self,
             X,
             y,
-            epochs=self.__config["train"]["epochs"],
-            validation_split=self.__config["train"]["validation_split"],
+            epochs=self.__config[self.model_name]["train"]["epochs"],
+            validation_split=self.__config[self.model_name]["train"]["validation_split"],
         )
 
     def save(self):
         with suppress(FileNotFoundError):
             shutil.rmtree("teacher_model")
 
-        keras.Sequential.save(self, self.__config["dir"])
+        keras.Sequential.save(self, self.__config[self.model_name]["dir"])
 
 
 class TeacherModel(ModelBase):
@@ -50,6 +55,8 @@ class TeacherModel(ModelBase):
         ModelBase.__init__(self, "teacher")
 
         self.add(keras.Input(shape=(12,)))
+        self.add(layers.Dense(64, activation="relu"))
+        self.add(layers.Dropout(0.15))
         self.add(layers.Dense(32, activation="relu"))
         self.add(layers.Dropout(0.25))
         self.add(layers.Dense(16, activation="relu"))
@@ -156,4 +163,4 @@ class Distiller(keras.Model):
         return results
 
     def fit(self, X, y):
-        keras.Model.fit(self, X, y, epochs=3)
+        keras.Model.fit(self, X, y, epochs=CONFIG["distiller"]['train']["epochs"])
