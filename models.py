@@ -3,6 +3,7 @@ import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 import json
+import logging
 import shutil
 from contextlib import suppress
 
@@ -23,20 +24,19 @@ class ModelBase(keras.Sequential):
         self.__config = _read_config("teacher_model_config.json")
 
     def fit(self, X, y):
-        training_vector_size = min(
-            self.__config["train"]["training_vector_size"], X.shape[0]
-        )
-
-        X = X[:training_vector_size]
-        y = y[:training_vector_size]
-
-        print(
+        logging.debug(
             "Start training model '{}'. epochs={}, training_vector_size={}".format(
                 self.name, self.__config["train"]["epochs"], X.shape[0]
             )
         )
 
-        keras.Sequential.fit(self, X, y, epochs=self.__config["train"]["epochs"])
+        keras.Sequential.fit(
+            self,
+            X,
+            y,
+            epochs=self.__config["train"]["epochs"],
+            validation_split=self.__config["train"]["validation_split"],
+        )
 
     def save(self):
         with suppress(FileNotFoundError):
@@ -49,20 +49,19 @@ class TeacherModel(ModelBase):
     def __init__(self):
         ModelBase.__init__(self, "teacher")
 
-        self.add(keras.Input(shape=(28, 28, 1)))
-        self.add(layers.Conv2D(256, (3, 3), strides=(2, 2), padding="same"))
-        self.add(layers.LeakyReLU(alpha=0.2))
-        self.add(layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), padding="same"))
-        self.add(layers.Conv2D(512, (3, 3), strides=(2, 2), padding="same"))
-        self.add(layers.Flatten())
-        self.add(layers.Dense(10))
+        self.add(keras.Input(shape=(12,)))
+        self.add(layers.Dense(32, activation="relu"))
+        self.add(layers.Dropout(0.25))
+        self.add(layers.Dense(16, activation="relu"))
+        self.add(layers.Dropout(0.25))
+        self.add(layers.Dense(1, activation="sigmoid"))
 
     def compile(self):
         keras.Sequential.compile(
             self,
-            optimizer=keras.optimizers.Adam(),
-            loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=[keras.metrics.SparseCategoricalAccuracy()],
+            optimizer=keras.optimizers.Adam(0.002, 0.5),
+            loss="binary_crossentropy",
+            metrics=["accuracy"],
         )
 
 
@@ -70,13 +69,10 @@ class StudentModel(ModelBase):
     def __init__(self):
         ModelBase.__init__(self, "student")
 
-        self.add(keras.Input(shape=(28, 28, 1)))
-        self.add(layers.Conv2D(16, (3, 3), strides=(2, 2), padding="same"))
-        self.add(layers.LeakyReLU(alpha=0.2))
-        self.add(layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), padding="same"))
-        self.add(layers.Conv2D(32, (3, 3), strides=(2, 2), padding="same"))
-        self.add(layers.Flatten())
-        self.add(layers.Dense(10))
+        self.add(keras.Input(shape=(12,)))
+        self.add(layers.Dense(16, activation="relu"))
+        self.add(layers.Dropout(0.25))
+        self.add(layers.Dense(1, activation="sigmoid"))
 
 
 class Distiller(keras.Model):
@@ -88,13 +84,11 @@ class Distiller(keras.Model):
 
     def compile(self):
         optimizer = keras.optimizers.Adam()
-        metrics = keras.metrics.SparseCategoricalAccuracy()
+        metrics = ['accuracy']
 
         keras.Model.compile(self, optimizer=optimizer, metrics=metrics)
 
-        self.student_loss_fn = keras.losses.SparseCategoricalCrossentropy(
-            from_logits=True
-        )
+        self.student_loss_fn = keras.losses.BinaryCrossentropy()
         self.distillation_loss_fn = keras.losses.KLDivergence()
         self.alpha = 0.1
         self.temperature = 10

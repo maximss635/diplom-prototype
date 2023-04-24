@@ -1,4 +1,6 @@
 models/
+data/
+
 __pycache__/
 usecase.log
 

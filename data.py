@@ -1,17 +1,19 @@
 import numpy as np
+import pandas as pd
+from sklearn.model_selection import KFold, train_test_split
+from sklearn.preprocessing import StandardScaler
 from tensorflow import keras
 
 
 def get_data():
-    # Prepare the train and test dataset.
-    (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+    df = pd.read_csv('data/Balanced.csv')
+    df = df.drop(['proto', 'state'], axis=1)
+    df = df.sample(frac=1)
+    X = StandardScaler().fit_transform(df.drop(['attack'], axis=1).values)
+    y = df.attack.values
 
-    # Normalize data
-    x_train = x_train.astype("float32") / 255.0
-    x_train = np.reshape(x_train, (-1, 28, 28, 1))
+    # Hold-out
+    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.3)
 
-    x_test = x_test.astype("float32") / 255.0
-    x_test = np.reshape(x_test, (-1, 28, 28, 1))
-
-    return x_train, y_train, x_test, y_test
+    return X_train, y_train, X_test, y_test
 
