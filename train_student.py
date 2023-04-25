@@ -3,21 +3,44 @@ import logging
 
 from tensorflow import keras
 
+from config import read_config, setup_logger
 from data import get_data
-from logger import setup_logger
 from models import Distiller, StudentModel
 
 
-def _read_config():
-    with open("config.json", "r") as fd:
-        return json.load(fd)
+def compile_student_model(student_model, config):
+    config = config["protection_methods"]["distillation"]["student_model"]
+
+    logging.debug("Compiling student model")
+
+    optimizer = keras.optimizers.Adam(
+        config["train"]["learning_rate"],
+        config["train"]["beta_1"],
+        config["train"]["beta_2"],
+    )
+
+    loss = config["train"]["loss"]
+    metrics = config["train"]["metrics"]
+
+    student_model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
+    return student_model
+
+
+def train_student_model(student_model, config, X, y):
+    logging.info("Training student model")
+
+    config = config["protection_methods"]["distillation"]["student_model"]["train"]
+    student_model.fit(X, y, epochs=config["epochs"])
 
 
 def main():
-    config = _read_config()
+    config = read_config()
+    student_model_config = config["protection_methods"]["distillation"]["student_model"]
+
     x_train, y_train, x_test, y_test = get_data()
 
-    teacher_model_dir = config["teacher"]["dir"]
+    teacher_model_dir = config["model"]["dir"]
     logging.info("Loading teacher model - {}".format(teacher_model_dir))
     teacher_model = keras.models.load_model(teacher_model_dir)
 
@@ -37,18 +60,11 @@ def main():
     logging.info("Test results = {}".format(test_results))
 
     # Train student as doen usually
-    student_scratch.compile(
-        optimizer=keras.optimizers.Adam(0.002, 0.5),
-        loss="binary_crossentropy",
-        metrics=["accuracy"],
-    )
+    student_scratch = compile_student_model(student_scratch, config)
+    train_student_model(student_scratch, config, x_train, y_train)
 
-    logging.info("Training student model")
-    epochs = config["student"]["train"]["epochs"]
-    student_scratch.fit(x_train, y_train, epochs=epochs)
-
-    logging.info("Saving student model to '{}'".format(config["student"]["dir"]))
-    student_scratch.save(config["student"]["dir"])
+    logging.info("Saving student model to '{}'".format(student_model_config["dir"]))
+    student_scratch.save(student_model_config["dir"])
 
 
 if __name__ == "__main__":
