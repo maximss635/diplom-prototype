@@ -23,7 +23,7 @@ class ModelBase(keras.Sequential):
         keras.Sequential.__init__(self, name=model_name)
 
         self.model_name = model_name
-        
+
         self._config = None
         self.__history = None
 
@@ -82,7 +82,7 @@ class ModelBase(keras.Sequential):
         with suppress(FileNotFoundError):
             shutil.rmtree("teacher_model")
 
-        logging.debug(
+        logging.info(
             "Saving '{}' to '{}'".format(self.model_name, self._config["dir"])
         )
         keras.Sequential.save(self, self._config["dir"])

@@ -10,7 +10,7 @@ from time import time
 from tensorflow import keras
 
 from data import get_data
-from utils import setup_logger
+from utils import setup_logger, read_config
 
 
 def main(context):
@@ -19,7 +19,7 @@ def main(context):
         sys.exit(1)
 
     model = keras.models.load_model(context.dir)
-    _, _, x_test, y_test = get_data()
+    _, _, x_test, y_test = get_data(read_config()["data"]["path_csv"])
 
     t = time()
     loss, metric = model.evaluate(x_test, y_test)

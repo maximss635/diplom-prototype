@@ -1,4 +1,7 @@
 {
+    "data": {
+        "path_csv": "data/Balanced.csv"
+    },
     "model": {
             "train": {
             "epochs": 12,
@@ -41,5 +44,5 @@
             "state": false
         }
     },
-    "logging_level": "debug"
+    "logging_level": "info"
 }

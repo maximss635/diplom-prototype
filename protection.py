@@ -1,5 +1,16 @@
+import logging
+import os
+
 import numpy as np
-from utils import read_config
+from tensorflow import keras
+
+from models import Distiller, StudentModel
+from student_model_utils import (
+    compile_student_model,
+    save_plots_student_model,
+    train_student_model,
+)
+from utils import read_config, save_model_schema
 
 
 class AugmentationMechanism:
@@ -48,3 +59,62 @@ class AugmentationMechanism:
 
     def get_data(self):
         return self.X_train, self.y_train, self.X_test, self.y_test
+
+
+class DistillationMechanism:
+    """
+    Защитный механизм дистилляции
+
+    Входные параметры: Обученная модель МО
+    Выходные параметры: Дистиллированная модель МО
+    """
+
+    def __init__(self, model, X_train, y_train, X_test, y_test):
+        self.teacher_model = model
+        self.X_train = X_train
+        self.X_test = X_test
+        self.y_train = y_train
+        self.y_test = y_test
+
+        self.student_model = None
+
+        self._config = read_config()["protection_methods"]["distillation"]
+
+    def execute(self):
+        logging.debug("Create student model")
+        student_model = StudentModel()
+        student_scratch = keras.models.clone_model(student_model)
+
+        logging.debug("Create destiller")
+        distiller = Distiller(student=student_model, teacher=self.teacher_model)
+        distiller.compile()
+
+        logging.debug("Training distiller")
+        distiller.fit(self.X_train, self.y_train)
+
+        logging.debug("Testing distiller")
+        test_results = distiller.evaluate(self.X_test, self.y_test)
+        logging.debug("Test results = {}".format(test_results))
+
+        # Train student as doen usually
+        student_scratch = compile_student_model(student_scratch, self._config)
+        history = train_student_model(
+            student_scratch, self._config, self.X_train, self.y_train
+        )
+
+        logging.info(
+            "Saving student model to '{}'".format(self._config["student_model"]["dir"])
+        )
+        student_scratch.save(self._config["student_model"]["dir"])
+
+        save_model_schema(
+            student_scratch,
+            os.path.join(self._config["student_model"]["dir"], "debug"),
+        )
+
+        save_plots_student_model(history, self._config)
+
+        self.student_model = student_scratch
+
+    def get_distillated_model(self):
+        return self.student_model
