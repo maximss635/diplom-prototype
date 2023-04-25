@@ -18,6 +18,29 @@ CONFIG = read_config()
 setup_logger()
 
 
+class RobustOptimizationMechanism:
+    """
+    Защитный механизм устойчивой оптимизации.
+    Определяет кастомную функцию потерь для обучения модели
+
+    Входные параметры: Модель МО
+    """
+
+    def __init__(self, model):
+        self._config = CONFIG["protection_methods"]["sustainable_optimization"]
+        self._model = model
+
+    def loss(self, y_true, y_pred):
+        weight_decay = self._config["weight_decay"]
+
+        l2_reg = tf.reduce_sum(
+            [tf.nn.l2_loss(w) for w in self._model.trainable_weights]
+        )
+        cross_entropy = tf.keras.losses.BinaryCrossentropy()(y_true, y_pred)
+
+        return tf.reduce_mean(cross_entropy + weight_decay * l2_reg)
+
+
 class ModelBase(keras.Sequential):
     def __init__(self, model_name):
         keras.Sequential.__init__(self, name=model_name)
@@ -112,6 +135,15 @@ class TeacherModel(ModelBase):
         )
         loss = self._config["train"]["loss"]
         metrics = self._config["train"]["metrics"]
+
+        # Применение механизма устойчивой оптимизации
+        if CONFIG["protection_methods"]["sustainable_optimization"]["state"]:
+            logging.info(
+                "(PROTECTION-MECHANISM-2) Doing sustainable optimization - define custom loss-function"
+            )
+
+            optimization_mechanism = RobustOptimizationMechanism(self)
+            loss = optimization_mechanism.loss
 
         keras.Sequential.compile(self, optimizer=optimizer, loss=loss, metrics=metrics)
 

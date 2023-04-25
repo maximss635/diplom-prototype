@@ -46,7 +46,7 @@ def main():
 
     # Механизм защиты 2 - дистилляция модели
     if CONFIG["protection_methods"]["distillation"]["state"]:
-        logging.info("(PROTECTION-MECHANISM-2) Doing model-distillation")
+        logging.info("(PROTECTION-MECHANISM-3) Doing model-distillation")
 
         distillation_mechanism = DistillationMechanism(
             main_model, X_train, y_train, X_test, y_test
