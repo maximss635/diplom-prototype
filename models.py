@@ -57,34 +57,32 @@ class ModelBase(keras.Sequential):
 
         logging.debug("Draw plots")
 
-        plt.figure(figsize=(16,10))
+        plt.figure(figsize=(16, 10))
 
         # accuracy
-        plt.plot(self.__history.history['accuracy'])
-        plt.plot(self.__history.history['val_accuracy'])
-        plt.title('model accuracy')
-        plt.ylabel('accuracy')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'validation'], loc='upper left')
+        plt.plot(self.__history.history["accuracy"])
+        plt.plot(self.__history.history["val_accuracy"])
+        plt.title("model accuracy")
+        plt.ylabel("accuracy")
+        plt.xlabel("epoch")
+        plt.legend(["train", "validation"], loc="upper left")
         plt.savefig(path_accuracy)
 
         # "Loss"
-        plt.figure(figsize=(16,10))
-        plt.plot(self.__history.history['loss'])
-        plt.plot(self.__history.history['val_loss'])
-        plt.title('model loss')
-        plt.ylabel('loss')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'validation'], loc='upper left')
+        plt.figure(figsize=(16, 10))
+        plt.plot(self.__history.history["loss"])
+        plt.plot(self.__history.history["val_loss"])
+        plt.title("model loss")
+        plt.ylabel("loss")
+        plt.xlabel("epoch")
+        plt.legend(["train", "validation"], loc="upper left")
         plt.savefig(path_loss)
 
     def save(self):
         with suppress(FileNotFoundError):
             shutil.rmtree("teacher_model")
 
-        logging.info(
-            "Saving '{}' to '{}'".format(self.model_name, self._config["dir"])
-        )
+        logging.info("Saving '{}' to '{}'".format(self.model_name, self._config["dir"]))
         keras.Sequential.save(self, self._config["dir"])
 
     def path(self):

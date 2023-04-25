@@ -61,5 +61,3 @@ def train_student_model(student_model, config, X, y):
 
     config = config["student_model"]["train"]
     return student_model.fit(X, y, epochs=config["epochs"])
-
-

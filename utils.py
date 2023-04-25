@@ -48,4 +48,3 @@ def save_model_schema(model, path):
 
     with open(os.path.join(path, "model_schema.txt"), "w") as fd:
         model.summary(print_fn=lambda line: fd.write(line + "\n"))
-

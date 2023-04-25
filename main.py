@@ -48,7 +48,9 @@ def main():
     if CONFIG["protection_methods"]["distillation"]["state"]:
         logging.info("(PROTECTION-MECHANISM-2) Doing model-distillation")
 
-        distillation_mechanism = DistillationMechanism(main_model, X_train, y_train, X_test, y_test)
+        distillation_mechanism = DistillationMechanism(
+            main_model, X_train, y_train, X_test, y_test
+        )
         distillation_mechanism.execute()
 
         # Подменяем модель
@@ -59,4 +61,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
