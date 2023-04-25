@@ -1,22 +1,44 @@
 {
-    "teacher": {
-        "train": {
+    "model": {
+            "train": {
             "epochs": 12,
-            "validation_split": 0.2
+            "validation_split": 0.2,
+            "loss": "binary_crossentropy",
+            "metrics": ["accuracy"],
+            "learning_rate": 0.002,
+            "beta_1": 0.5,
+            "beta_2": 0.999
         },
         "dir": "models/teacher_model"
     },
-    "student": {
-        "train": {
-            "epochs": 15,
-            "validation_split": 0.2
+    "protection_methods": {
+        "augmentation" :{
+            "state": true
         },
-        "dir": "models/student_model"
-    },
-    "distiller": {
-        "train": {
-            "epochs": 5,
-            "validation_split": 0.2
+        "distillation": {
+            "state": true,
+            "student_model": {
+                "train": {
+                    "epochs": 15,
+                    "validation_split": 0.2,
+                    "learning_rate": 0.002,
+                    "beta_1": 0.5,
+                    "beta_2": 0.999,
+                    "loss": "binary_crossentropy",
+                    "metrics": ["accuracy"]
+                },
+                "dir": "models/student_model"
+            },
+            "distillation_model": {
+                "train": {
+                    "epochs": 5,
+                    "validation_split": 0.2
+                }
+            }
+        },
+        "sustainable_optimization": {
+            "state": false
         }
-    }
+    },
+    "logging_level": "debug"
 }

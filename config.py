@@ -1,9 +1,22 @@
+import json
 import logging
+import logging.config
 import os
-from logging import config
+
+
+def read_config():
+    with open("config.json", "r") as fd:
+        return json.load(fd)
 
 
 def setup_logger():
+    level = {
+        "debug": logging.DEBUG,
+        "error": logging.ERROR,
+        "warning": logging.WARNING,
+        "info": logging.INFO,
+    }[read_config()["logging_level"]]
+
     LOGGING_CONFIG = {
         "version": 1,
         "formatters": {
@@ -12,7 +25,7 @@ def setup_logger():
                 "datefmt": "%a, %d %b %Y %H:%M:%S",
             },
         },
-        "root": {"level": logging.DEBUG, "handlers": ["verbose_output"]},
+        "root": {"level": level, "handlers": ["verbose_output"]},
         "handlers": {
             "verbose_output": {
                 "formatter": "standard",

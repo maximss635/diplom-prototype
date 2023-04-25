@@ -10,7 +10,7 @@ from time import time
 from tensorflow import keras
 
 from data import get_data
-from logger import setup_logger
+from config import setup_logger
 
 
 def main(context):

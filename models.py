@@ -11,15 +11,9 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
-from logger import setup_logger
+from config import read_config, setup_logger
 
-
-def _read_config(path):
-    with open(path, "r") as fd:
-        return json.load(fd)
-
-
-CONFIG = _read_config("config.json")
+CONFIG = read_config()
 setup_logger()
 
 
@@ -28,24 +22,24 @@ class ModelBase(keras.Sequential):
         keras.Sequential.__init__(self, name=model_name)
 
         self.model_name = model_name
-
-        self.__config = _read_config("config.json")
+        self._config = None
 
     def fit(self, X, y):
         logging.debug(
             "Start training model '{}'. epochs={}, training_vector_size={}".format(
-                self.name, self.__config[self.model_name]["train"]["epochs"], X.shape[0]
+                self.name, self._config["train"]["epochs"], X.shape[0]
             )
         )
+
+        logging.debug("X shape = {}".format(X.shape))
+        logging.debug("y shape = {}".format(y.shape))
 
         keras.Sequential.fit(
             self,
             X,
             y,
-            epochs=self.__config[self.model_name]["train"]["epochs"],
-            validation_split=self.__config[self.model_name]["train"][
-                "validation_split"
-            ],
+            epochs=self._config["train"]["epochs"],
+            validation_split=self._config["train"]["validation_split"],
         )
 
     def save(self):
@@ -53,11 +47,9 @@ class ModelBase(keras.Sequential):
             shutil.rmtree("teacher_model")
 
         logging.debug(
-            "Saving '{}' to '{}'".format(
-                self.model_name, self.__config[self.model_name]["dir"]
-            )
+            "Saving '{}' to '{}'".format(self.model_name, self._config["dir"])
         )
-        keras.Sequential.save(self, self.__config[self.model_name]["dir"])
+        keras.Sequential.save(self, self._config["dir"])
 
 
 class TeacherModel(ModelBase):
@@ -73,18 +65,25 @@ class TeacherModel(ModelBase):
         self.add(layers.Dropout(0.25))
         self.add(layers.Dense(1, activation="sigmoid"))
 
+        self._config = CONFIG["model"]
+
     def compile(self):
-        keras.Sequential.compile(
-            self,
-            optimizer=keras.optimizers.Adam(0.002, 0.5),
-            loss="binary_crossentropy",
-            metrics=["accuracy"],
+        optimizer = keras.optimizers.Adam(
+            self._config["train"]["learning_rate"],
+            self._config["train"]["beta_1"],
+            self._config["train"]["beta_2"],
         )
+        loss = self._config["train"]["loss"]
+        metrics = self._config["train"]["metrics"]
+
+        keras.Sequential.compile(self, optimizer=optimizer, loss=loss, metrics=metrics)
 
 
 class StudentModel(ModelBase):
     def __init__(self):
         ModelBase.__init__(self, "student")
+
+        self._config = CONFIG["protection_methods"]["distillation"]["student_model"]
 
         self.add(keras.Input(shape=(12,)))
         self.add(layers.Dense(32, activation="relu"))
@@ -100,6 +99,10 @@ class Distiller(keras.Model):
 
         self.teacher = teacher
         self.student = student
+
+        self._config = CONFIG["protection_methods"]["distillation"][
+            "distillation_model"
+        ]
 
     def compile(self):
         optimizer = keras.optimizers.Adam()
@@ -175,4 +178,4 @@ class Distiller(keras.Model):
         return results
 
     def fit(self, X, y):
-        keras.Model.fit(self, X, y, epochs=CONFIG["distiller"]["train"]["epochs"])
+        keras.Model.fit(self, X, y, epochs=self._config["train"]["epochs"])
