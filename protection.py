@@ -1,5 +1,5 @@
 import numpy as np
-from config import read_config
+from utils import read_config
 
 
 class AugmentationMechanism:

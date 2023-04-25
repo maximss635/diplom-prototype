@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-from config import setup_logger
+from utils import setup_logger
 from protection import AugmentationMechanism
 
 NEED_AUGMENTATION = True

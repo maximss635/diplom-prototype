@@ -40,3 +40,12 @@ def setup_logger():
 
     # Отключение логов tensorflow
     os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
+
+def save_model_schema(model, path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    with open(os.path.join(path, "model_schema.txt"), "w") as fd:
+        model.summary(print_fn=lambda line: fd.write(line + "\n"))
+

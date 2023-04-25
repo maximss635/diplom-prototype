@@ -8,10 +8,11 @@ import shutil
 from contextlib import suppress
 
 import tensorflow as tf
+from matplotlib import pyplot as plt
 from tensorflow import keras
 from tensorflow.keras import layers
 
-from config import read_config, setup_logger
+from utils import read_config, setup_logger
 
 CONFIG = read_config()
 setup_logger()
@@ -22,7 +23,9 @@ class ModelBase(keras.Sequential):
         keras.Sequential.__init__(self, name=model_name)
 
         self.model_name = model_name
+        
         self._config = None
+        self.__history = None
 
     def fit(self, X, y):
         logging.debug(
@@ -34,13 +37,46 @@ class ModelBase(keras.Sequential):
         logging.debug("X shape = {}".format(X.shape))
         logging.debug("y shape = {}".format(y.shape))
 
-        keras.Sequential.fit(
+        self.__history = keras.Sequential.fit(
             self,
             X,
             y,
             epochs=self._config["train"]["epochs"],
             validation_split=self._config["train"]["validation_split"],
         )
+
+        self.save_train_plots()
+
+    def save_train_plots(self):
+        debug_path = os.path.join(self._config["dir"], "debug")
+        if not os.path.exists(debug_path):
+            os.mkdir(debug_path)
+
+        path_accuracy = os.path.join(debug_path, "accuracy.png")
+        path_loss = os.path.join(debug_path, "loss.png")
+
+        logging.debug("Draw plots")
+
+        plt.figure(figsize=(16,10))
+
+        # accuracy
+        plt.plot(self.__history.history['accuracy'])
+        plt.plot(self.__history.history['val_accuracy'])
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'validation'], loc='upper left')
+        plt.savefig(path_accuracy)
+
+        # "Loss"
+        plt.figure(figsize=(16,10))
+        plt.plot(self.__history.history['loss'])
+        plt.plot(self.__history.history['val_loss'])
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'validation'], loc='upper left')
+        plt.savefig(path_loss)
 
     def save(self):
         with suppress(FileNotFoundError):
@@ -50,6 +86,9 @@ class ModelBase(keras.Sequential):
             "Saving '{}' to '{}'".format(self.model_name, self._config["dir"])
         )
         keras.Sequential.save(self, self._config["dir"])
+
+    def path(self):
+        return self._config["dir"]
 
 
 class TeacherModel(ModelBase):
