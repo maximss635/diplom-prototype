@@ -13,7 +13,8 @@
     },
     "protection_methods": {
         "augmentation" :{
-            "state": true
+            "state": true,
+            "fraction": 0.5
         },
         "distillation": {
             "state": true,
