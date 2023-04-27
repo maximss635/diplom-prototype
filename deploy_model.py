@@ -24,7 +24,7 @@ class HttpHandler(BaseHTTPRequestHandler):
         body = body.decode()
         body = json.loads(body)
 
-        prediction = self.server.predict(body["x"])
+        prediction = self.server.predict(body["features"])
 
         if prediction:
             answer = {"is_attack": True}

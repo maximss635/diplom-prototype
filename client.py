@@ -19,7 +19,7 @@ def main():
         -0.0835073,
     ]
 
-    request_body = {"x": x}
+    request_body = {"features": x}
 
     print("Send:\n{}".format(json.dumps(request_body, indent=4)))
 
