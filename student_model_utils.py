@@ -24,6 +24,9 @@ def compile_student_model(student_model, config):
     return student_model
 
 
+LEGEND = ["Тренировочная выборка", "Валидационная выборка"]
+
+
 def save_plots_student_model(history, config):
     config = config["student_model"]
 
@@ -36,23 +39,27 @@ def save_plots_student_model(history, config):
 
     logging.debug("Draw plots")
 
-    plt.figure(figsize=(16, 10))
+    plt.figure(figsize=(6, 6))
 
     # accuracy
     plt.plot(history.history["accuracy"])
-    plt.title("model accuracy")
-    plt.ylabel("accuracy")
-    plt.xlabel("epoch")
-    plt.legend(["train", "validation"], loc="upper left")
+    plt.plot(history.history["val_accuracy"])
+    plt.title("Зависимость точности для модели")
+    plt.ylabel("Точность")
+    plt.xlabel("Номер эпохи")
+    plt.legend(LEGEND, loc="upper left")
+    plt.grid()
     plt.savefig(path_accuracy)
 
     # "Loss"
-    plt.figure(figsize=(16, 10))
+    plt.figure(figsize=(6, 6))
     plt.plot(history.history["loss"])
-    plt.title("model loss")
-    plt.ylabel("loss")
-    plt.xlabel("epoch")
-    plt.legend(["train", "validation"], loc="upper left")
+    plt.plot(history.history["val_loss"])
+    plt.title("Зависимость функции потерь для модели")
+    plt.ylabel("Потери")
+    plt.xlabel("Номер эпохи")
+    plt.legend(LEGEND, loc="upper left")
+    plt.grid()
     plt.savefig(path_loss)
 
 
@@ -60,4 +67,4 @@ def train_student_model(student_model, config, X, y):
     logging.info("Training student model")
 
     config = config["student_model"]["train"]
-    return student_model.fit(X, y, epochs=config["epochs"])
+    return student_model.fit(X, y, epochs=config["epochs"], validation_split=0.2)
