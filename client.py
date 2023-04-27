@@ -21,11 +21,15 @@ def main():
 
     request_body = {"x": x}
 
+    print("Send:\n{}".format(json.dumps(request_body, indent=4)))
+
     conn = http.client.HTTPConnection(URL)
     conn.request("POST", "/", body=json.dumps(request_body))
 
-    res = conn.getresponse()
-    print(res.read())
+    answer = conn.getresponse()
+    answer = json.loads(answer.read().decode("utf-8"))
+    print("Recv:")
+    print(json.dumps(answer, indent=4))
 
 
 if __name__ == "__main__":
