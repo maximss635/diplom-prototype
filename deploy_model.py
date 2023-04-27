@@ -19,7 +19,7 @@ class HttpHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         logging.info("New POST request")
 
-        length = int(self.headers.get('content-length'))
+        length = int(self.headers.get("content-length"))
         body = self.rfile.read(length)
         body = body.decode()
         body = json.loads(body)
@@ -48,10 +48,7 @@ class HTTPModelServer(HTTPServer):
     def load_model(self):
         logging.info("Loading model")
         self.model = keras.models.load_model(
-            self._config["protection_methods"]\
-                ["distillation"]\
-                ["student_model"]\
-                ["dir"]
+            self._config["protection_methods"]["distillation"]["student_model"]["dir"]
         )
 
     def predict(self, x):
