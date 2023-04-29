@@ -26,10 +26,7 @@ class HttpHandler(BaseHTTPRequestHandler):
 
         prediction = self.server.predict(body["features"])
 
-        if prediction:
-            answer = {"is_attack": True}
-        else:
-            answer = {"is_attack": False}
+        answer = {"is_attack": prediction}
 
         self._set_headers()
         self.wfile.write(bytes(json.dumps(answer), encoding="utf-8"))
@@ -52,7 +49,7 @@ class HTTPModelServer(HTTPServer):
         )
 
     def predict(self, x):
-        return self.model.predict([x])[0][0] > 0.5
+        return self.model.predict([x])[0][0]
 
 
 def main():
