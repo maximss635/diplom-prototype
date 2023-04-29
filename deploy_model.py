@@ -26,7 +26,7 @@ class HttpHandler(BaseHTTPRequestHandler):
 
         prediction = self.server.predict(body["features"])
 
-        answer = {"is_attack": prediction}
+        answer = {"is_attack": round(float(prediction), 4)}
 
         self._set_headers()
         self.wfile.write(bytes(json.dumps(answer), encoding="utf-8"))
